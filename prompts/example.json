@@ -6,6 +6,7 @@
     "height": [512,640,768],
     "sd_model_hash": ["925997e9"],
     "clip_skip": [2],
-    "prompt": "(((masterpiece, best quality, intricate))), watercolor, ((blunt bangs, open black eyes, black very long hair, hair flower red rose, lace, lace trim)), [[[[black pupils, eyelashes]]]], (red dress, frills, gothic lolita, short skirt, bowknot, stocking, garter, cross-laced footwear, ribbon-trimmed sleeves), faint lips, navel, nail polish, red nails",
-    "negative_prompt": "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry"
+    "prompt": "(masterpiece:1.0~1.4), (((best quality, intricate))), watercolor, ((blunt bangs, open black eyes, black very long hair, hair flower red rose, lace, lace trim)), [[[[black pupils, eyelashes]]]], (red dress, frills, gothic lolita, short skirt, bowknot, stocking, garter, cross-laced footwear, ribbon-trimmed sleeves), faint lips, navel, nail polish, red nails",
+    "negative_prompt": "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry",
+    "prompt_count": 5
 }

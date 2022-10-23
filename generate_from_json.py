@@ -64,6 +64,16 @@ class Script(scripts.Script):
                 ]
 
     def run(self, p, directory, open_directory):
+        def shift_attention(text, distance):
+            re_attention_span = re.compile(r"([.\d]+)~([.\d]+)", re.X)
+            def inject_value(distance, match_obj):
+                start_weight = float(match_obj.group(1))
+                end_weight = float(match_obj.group(2))
+                return str(round(start_weight + (end_weight - start_weight) * distance, 6))
+
+            res = re.sub(re_attention_span, lambda match_obj: inject_value(distance, match_obj), text)
+            return res
+
         p.do_not_save_grid = True
 
         files = glob(directory + "/*.json")
@@ -80,6 +90,24 @@ class Script(scripts.Script):
                     if k not in a:
                         job.update({k: v})
                 
+                if (data["prompt_count"]):
+                    c = data["prompt_count"]
+                    pp = []
+                    for i in range(c):
+                        res = shift_attention(data["prompt"], float(i / (c - 1)))
+                        pp.append(res)
+                        if (res == data["prompt"]):
+                            break
+                    np = []
+                    for i in range(c):
+                        res = shift_attention(data["negative_prompt"], float(i / (c - 1)))
+                        np.append(res)
+                        if (res == data["negative_prompt"]):
+                            break
+                    data["prompt"] = pp
+                    data["negative_prompt"] = np
+                    del data["prompt_count"]
+
                 tmp = []
                 # 辞書のitemで回す
                 for key, value in data.items():
