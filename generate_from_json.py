@@ -8,6 +8,8 @@ import platform
 import subprocess as sp
 import copy
 import re
+import pprint
+import itertools
 
 import modules.scripts as scripts
 import gradio as gr
@@ -72,27 +74,42 @@ class Script(scripts.Script):
                 data = json.load(f)
                 job = dict()
 
+                # その他の項目
                 for k, v in data.items():
                     a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler"]
                     if k not in a:
                         job.update({k: v})
-                for _width in data["width"]:
-                    job.update({"width": _width})
-                    for _height in data["height"]:
-                        job.update({"height": _height})
-                        for _cfg_scale in data["cfg_scale"]:
-                            job.update({"cfg_scale": _cfg_scale})
-                            for _steps in data["steps"]:
-                                job.update({"steps": _steps})
-                                for _sd_model_hash in data["sd_model_hash"]:
-                                    job.update({"sd_model_hash": _sd_model_hash})
-                                    for _clip_skip in data["clip_skip"]:
-                                        job.update({"clip_skip": _clip_skip})
-                                        for _sampler in data["sampler"]:
-                                            for idx, name in enumerate(sd_samplers.samplers):
-                                                if _sampler in name:
-                                                    job.update({"sampler_index": idx})
-                                            jobs.append(job.copy())
+                
+                tmp = []
+                # 辞書のitemで回す
+                for key, value in data.items():
+                    if type(value) != list:
+                        # valueがリストでないときはリストに変換
+                        # リストの要素がstrでないときはstrに変換してtmpに突っ込む
+                        tmp.append([str(data[key])] if data[key] != str else [data[key]])
+                    else:
+                        # valueがリスト
+                        # valueの要素のsub_keyがstrでないときはstrに変換
+                        tmp.append( [str(sub_key) if sub_key != str else sub_key 
+                                                  for sub_key in value] )
+
+                # *tmp でリストを展開して突っ込む ここで項目が1要素でもリストにしておかないと文字列のリストとみなされる
+                result = list(itertools.product(*tmp, repeat=1))
+                pprint.pprint(result)
+                for r in result:
+                    i = 0
+                    for k in data.keys():
+                        a = ["width","height","cfg_scale","steps","clip_skip"]
+                        if k in a:
+                            job.update({k: int(r[i])})
+                        elif k == "sampler":
+                            for idx, name in enumerate(sd_samplers.samplers):
+                                if r[i] in name:
+                                    job.update({"sampler_index": idx})
+                        else:
+                            job.update({k: r[i]})
+                        i += 1
+                    jobs.append(job.copy())
 
         img_count = len(jobs) * p.n_iter
         batch_count = math.ceil(img_count / p.batch_size)
