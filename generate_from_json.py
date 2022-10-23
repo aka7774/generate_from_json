@@ -73,9 +73,8 @@ class Script(scripts.Script):
                 job = dict()
 
                 for k, v in data.items():
-                    if re.match(r"^(width|height|cfg_scale|steps|sampler)$", k):
-                        pass
-                    else:
+                    a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler"]
+                    if k not in a:
                         job.update({k: v})
                 for _width in data["width"]:
                     job.update({"width": _width})
@@ -85,11 +84,15 @@ class Script(scripts.Script):
                             job.update({"cfg_scale": _cfg_scale})
                             for _steps in data["steps"]:
                                 job.update({"steps": _steps})
-                                for _sampler in data["sampler"]:
-                                    for idx, name in enumerate(sd_samplers.samplers):
-                                        if _sampler in name:
-                                            job.update({"sampler_index": idx})
-                                    jobs.append(job.copy())
+                                for _sd_model_hash in data["sd_model_hash"]:
+                                    job.update({"sd_model_hash": _sd_model_hash})
+                                    for _clip_skip in data["clip_skip"]:
+                                        job.update({"clip_skip": _clip_skip})
+                                        for _sampler in data["sampler"]:
+                                            for idx, name in enumerate(sd_samplers.samplers):
+                                                if _sampler in name:
+                                                    job.update({"sampler_index": idx})
+                                            jobs.append(job.copy())
 
         img_count = len(jobs) * p.n_iter
         batch_count = math.ceil(img_count / p.batch_size)
