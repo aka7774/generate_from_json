@@ -16,3 +16,4 @@
 ## ToDo List
 
 - Hypernet, Hypernet strength, ENSDに対応したいが、processing.pyが対応してないのでしんどい。
+- Highres. fixにも対応してない? してそうだけど指定の仕方がわからない。
