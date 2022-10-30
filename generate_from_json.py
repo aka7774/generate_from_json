@@ -17,7 +17,7 @@ import gradio as gr
 from modules.processing import Processed, process_images
 from PIL import Image
 from modules.shared import opts, cmd_opts, state
-from modules import sd_samplers
+from modules import sd_samplers, shared
 from glob import glob
 
 
@@ -47,23 +47,49 @@ class Script(scripts.Script):
 
     def ui(self, is_img2img):
         with gr.Row():
-            directory = gr.Textbox(label="Prompts Directory",
-                                   value="prompts", interactive=True)
-            open_directory = gr.Button("Open Prompts Directory")
-            open_directory.click(
-                fn=open_folder,
-                inputs=directory,
-                outputs=[],
-            )
+            with gr.Column(variant='panel'):
+                with gr.Group():
+                    directory = gr.Textbox(label="Prompts Directory", value="prompts", interactive=True)
+                    open_directory = gr.Button("Open Prompts Directory")
+                    open_directory.click(
+                        fn=open_folder,
+                        inputs=directory,
+                        outputs=[],
+                    )
 
-        return [directory, open_directory]
+                with gr.Group():
+                    webp_check = gr.Checkbox(label="Output webp with upscale", value=False)
+                    webp_quality_txt = gr.Textbox(label="Quality", value="75")
+                    webp_directory = gr.Textbox(label="webp Directory", value="outputs_webp", interactive=True)
+                    open_webp_directory = gr.Button("Open webp Directory")
+                    open_webp_directory.click(
+                        fn=open_folder,
+                        inputs=webp_directory,
+                        outputs=[],
+                    )
+                    with gr.Tabs(elem_id="extras_resize_mode"):
+                        with gr.TabItem('Scale by'):
+                            upscaling_resize = gr.Slider(minimum=1.0, maximum=4.0, step=0.05, label="Resize", value=2)
+                        with gr.TabItem('Scale to'):
+                            with gr.Group():
+                                with gr.Row():
+                                    upscaling_resize_w = gr.Number(label="Width", value=512, precision=0)
+                                    upscaling_resize_h = gr.Number(label="Height", value=512, precision=0)
+                                upscaling_crop = gr.Checkbox(label='Crop to fit', value=True)
+                    with gr.Group():
+                        extras_upscaler_1 = gr.Radio(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in shared.sd_upscalers], value=shared.sd_upscalers[0].name, type="index")
 
-    def on_show(self, directory, open_directory):
+        return [directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
+                             upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1]
+
+    def on_show(self, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
+                     upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
         return [gr.Textbox.update(visible=True),
                 gr.Button.update(visible=True),
                 ]
 
-    def run(self, p, directory, open_directory):
+    def run(self, p, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
+                     upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
 
         def shift_attention(text, distance):
             re_attention_span = re.compile(r"([.\d]+)~([.\d]+)", re.X)
@@ -80,13 +106,6 @@ class Script(scripts.Script):
         files = glob(directory + "/*.json")
 
         jobs = []
-        extras_upscaler_1 = -1
-        upscaling_resize = 1.0
-        upscaling_resize_w = 0
-        upscaling_resize_h = 0
-        upscaling_crop = 0
-        webp_quality = -1
-
         for fn in files:
             with open(fn) as f:
                 data = json.load(f)
@@ -99,7 +118,7 @@ class Script(scripts.Script):
                         job.update({k: v})
 
                 if ("upscaler" in data):
-                    extras_upscaler_1 = 0
+                    extras_upscaler_1 = data["upscaler"]
                     del data["upscaler"]
                     if (data["upscaling_resize"]):
                         upscaling_resize = float(data["upscaling_resize"])
@@ -197,21 +216,19 @@ class Script(scripts.Script):
 
                 return c
 
-            if upscaling_resize != 1.0:
-                resize_mode = 1
-                upscaling_resize = max(upscaling_resize_w/image.width, upscaling_resize_h/image.height)
-            else:
-                resize_mode = 0
-                upscaling_resize_w = image.width * upscaling_resize
-                upscaling_resize_h = image.height * upscaling_resize
+            if webp_check:
+                if upscaling_resize != 1.0:
+                    resize_mode = 1
+                    upscaling_resize = max(upscaling_resize_w/image.width, upscaling_resize_h/image.height)
+                else:
+                    resize_mode = 0
+                    upscaling_resize_w = image.width * upscaling_resize
+                    upscaling_resize_h = image.height * upscaling_resize
 
-            if extras_upscaler_1 >= 0:
                 res = upscale(image, extras_upscaler_1, upscaling_resize, resize_mode, upscaling_resize_w, upscaling_resize_h, upscaling_crop)
                 image = res
-
-            if webp_quality >= 0:
                 home_path = os.path.dirname(os.path.dirname(fn))
-                image.save(os.path.join(home_path, 'output_webp', f"{i:05}-{os.path.splitext(os.path.basename(fn))[0]}.webp"), quality=webp_quality)
+                image.save(os.path.join(home_path, 'output_webp', f"{i:05}-{os.path.splitext(os.path.basename(fn))[0]}.webp"), quality=int(webp_quality_txt))
 
             i += 1
 
