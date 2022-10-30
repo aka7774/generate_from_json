@@ -21,7 +21,7 @@
 ### webpとupscale
 
 - UIとjsonのどちらでも指定できる(json優先、チェックに関わらず有効)
---- jsonのupscaleには名前を指定することが出来ない(intでsd_upscalerのindexを指定)
+-- jsonのupscaleには名前を指定することが出来ない(intでsd_upscalerのindexを指定)
 - 本来の出力には全く影響を及ぼさない(原寸で出力される)
 
 ## ToDo List
