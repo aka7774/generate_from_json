@@ -64,6 +64,7 @@ class Script(scripts.Script):
                 ]
 
     def run(self, p, directory, open_directory):
+
         def shift_attention(text, distance):
             re_attention_span = re.compile(r"([.\d]+)~([.\d]+)", re.X)
             def inject_value(distance, match_obj):
@@ -79,6 +80,13 @@ class Script(scripts.Script):
         files = glob(directory + "/*.json")
 
         jobs = []
+        extras_upscaler_1 = -1
+        upscaling_resize = 1.0
+        upscaling_resize_w = 0
+        upscaling_resize_h = 0
+        upscaling_crop = 0
+        webp_quality = -1
+
         for fn in files:
             with open(fn) as f:
                 data = json.load(f)
@@ -89,23 +97,43 @@ class Script(scripts.Script):
                     a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler","Hypernet","ENSD"]
                     if k not in a:
                         job.update({k: v})
-                
-                if (data["prompt_count"]):
+
+                if ("upscaler" in data):
+                    extras_upscaler_1 = 0
+                    del data["upscaler"]
+                    if (data["upscaling_resize"]):
+                        upscaling_resize = float(data["upscaling_resize"])
+                        del data["upscaling_resize"]
+                    if ("upscaling_resize_w" in data):
+                        upscaling_resize_w = int(data["upscaling_resize_w"])
+                        upscaling_resize_h = int(data["upscaling_resize_h"])
+                        del data["upscaling_resize_w"]
+                        del data["upscaling_resize_h"]
+                    if ("upscaling_crop" in data):
+                        upscaling_crop = int(data["upscaling_crop"])
+                        del data["upscaling_crop"]
+
+                if ("webp_quality" in data):
+                    webp_quality = int(data["webp_quality"])
+                    del data["webp_quality"]
+
+                if ("prompt_count" in data):
                     c = data["prompt_count"]
-                    pp = []
-                    for i in range(c):
-                        res = shift_attention(data["prompt"], float(i / (c - 1)))
-                        pp.append(res)
-                        if (res == data["prompt"]):
-                            break
-                    np = []
-                    for i in range(c):
-                        res = shift_attention(data["negative_prompt"], float(i / (c - 1)))
-                        np.append(res)
-                        if (res == data["negative_prompt"]):
-                            break
-                    data["prompt"] = pp
-                    data["negative_prompt"] = np
+                    if c > 1:
+                        pp = []
+                        for i in range(c):
+                            res = shift_attention(data["prompt"], float(i / (c - 1)))
+                            pp.append(res)
+                            if (res == data["prompt"]):
+                                break
+                        np = []
+                        for i in range(c):
+                            res = shift_attention(data["negative_prompt"], float(i / (c - 1)))
+                            np.append(res)
+                            if (res == data["negative_prompt"]):
+                                break
+                        data["prompt"] = pp
+                        data["negative_prompt"] = np
                     del data["prompt_count"]
 
                 tmp = []
@@ -154,5 +182,37 @@ class Script(scripts.Script):
 
             proc = process_images(copy_p)
             images += proc.images
+
+        i = 0
+        for image in images:
+            image = image.convert("RGB")
+
+            def upscale(image, scaler_index, resize, mode, resize_w, resize_h, crop):
+                upscaler = shared.sd_upscalers[scaler_index]
+                c = upscaler.scaler.upscale(image, resize, upscaler.data_path)
+                if mode == 1 and crop:
+                    cropped = Image.new("RGB", (resize_w, resize_h))
+                    cropped.paste(c, box=(resize_w // 2 - c.width // 2, resize_h // 2 - c.height // 2))
+                    c = cropped
+
+                return c
+
+            if upscaling_resize != 1.0:
+                resize_mode = 1
+                upscaling_resize = max(upscaling_resize_w/image.width, upscaling_resize_h/image.height)
+            else:
+                resize_mode = 0
+                upscaling_resize_w = image.width * upscaling_resize
+                upscaling_resize_h = image.height * upscaling_resize
+
+            if extras_upscaler_1 >= 0:
+                res = upscale(image, extras_upscaler_1, upscaling_resize, resize_mode, upscaling_resize_w, upscaling_resize_h, upscaling_crop)
+                image = res
+
+            if webp_quality >= 0:
+                home_path = os.path.dirname(os.path.dirname(fn))
+                image.save(os.path.join(home_path, 'output_webp', f"{i:05}-{os.path.splitext(os.path.basename(fn))[0]}.webp"), quality=webp_quality)
+
+            i += 1
 
         return Processed(p, images, p.seed, "")
