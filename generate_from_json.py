@@ -10,6 +10,7 @@ import copy
 import re
 import pprint
 import itertools
+import time
 
 import modules.scripts as scripts
 import gradio as gr
@@ -68,6 +69,8 @@ class Script(scripts.Script):
                         outputs=[],
                     )
                     with gr.Tabs(elem_id="extras_resize_mode"):
+                        with gr.Group():
+                            resize_check = gr.Checkbox(label="Enable upscale", value=False)
                         with gr.TabItem('Scale by'):
                             upscaling_resize = gr.Slider(minimum=1.0, maximum=4.0, step=0.05, label="Resize", value=2)
                         with gr.TabItem('Scale to'):
@@ -80,16 +83,16 @@ class Script(scripts.Script):
                         extras_upscaler_1 = gr.Radio(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in shared.sd_upscalers], value=shared.sd_upscalers[0].name, type="index")
 
         return [directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
-                             upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1]
+                             resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1]
 
     def on_show(self, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
-                     upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
+                     resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
         return [gr.Textbox.update(visible=True),
                 gr.Button.update(visible=True),
                 ]
 
     def run(self, p, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
-                     upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
+                     resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
 
         def shift_attention(text, distance):
             re_attention_span = re.compile(r"([.\d]+)~([.\d]+)", re.X)
@@ -201,36 +204,37 @@ class Script(scripts.Script):
                 setattr(copy_p, k, v)
 
             proc = process_images(copy_p)
-            images += proc.images
 
-        i = 0
-        for image in images:
-            image = image.convert("RGB")
+            for image in proc.images:
+                if webp_check == False:
+                    break
+                image = image.convert("RGB")
 
-            def upscale(image, scaler_index, resize, mode, resize_w, resize_h, crop):
-                upscaler = shared.sd_upscalers[scaler_index]
-                c = upscaler.scaler.upscale(image, resize, upscaler.data_path)
-                if mode == 1 and crop:
-                    cropped = Image.new("RGB", (resize_w, resize_h))
-                    cropped.paste(c, box=(resize_w // 2 - c.width // 2, resize_h // 2 - c.height // 2))
-                    c = cropped
+                def upscale(image, scaler_index, resize, mode, resize_w, resize_h, crop):
+                    upscaler = shared.sd_upscalers[scaler_index]
+                    c = upscaler.scaler.upscale(image, resize, upscaler.data_path)
+                    if mode == 1 and crop:
+                        cropped = Image.new("RGB", (resize_w, resize_h))
+                        cropped.paste(c, box=(resize_w // 2 - c.width // 2, resize_h // 2 - c.height // 2))
+                        c = cropped
 
-                return c
+                    return c
 
-            if webp_check:
-                if upscaling_resize != 1.0:
-                    resize_mode = 1
-                    upscaling_resize = max(upscaling_resize_w/image.width, upscaling_resize_h/image.height)
-                else:
-                    resize_mode = 0
-                    upscaling_resize_w = image.width * upscaling_resize
-                    upscaling_resize_h = image.height * upscaling_resize
+                if resize_check:
+                    if upscaling_resize == 1.0:
+                        resize_mode = 1
+                        upscaling_resize = max(upscaling_resize_w/image.width, upscaling_resize_h/image.height)
+                    else:
+                        resize_mode = 0
+                        upscaling_resize_w = image.width * upscaling_resize
+                        upscaling_resize_h = image.height * upscaling_resize
 
-                res = upscale(image, extras_upscaler_1, upscaling_resize, resize_mode, upscaling_resize_w, upscaling_resize_h, upscaling_crop)
-                image = res
+                    res = upscale(image, extras_upscaler_1, upscaling_resize, resize_mode, upscaling_resize_w, upscaling_resize_h, upscaling_crop)
+                    image = res
+
                 home_path = os.path.dirname(os.path.dirname(fn))
-                image.save(os.path.join(home_path, 'output_webp', f"{i:05}-{os.path.splitext(os.path.basename(fn))[0]}.webp"), quality=int(webp_quality_txt))
+                image.save(os.path.join(home_path, 'output_webp', f"{os.path.splitext(os.path.basename(fn))[0]}-{float(time.time())}.webp"), quality=int(webp_quality_txt))
 
-            i += 1
+            images += proc.images
 
         return Processed(p, images, p.seed, "")
