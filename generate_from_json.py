@@ -86,7 +86,7 @@ class Script(scripts.Script):
 
                 # その他の項目
                 for k, v in data.items():
-                    a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler"]
+                    a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler","Hypernet","ENSD"]
                     if k not in a:
                         job.update({k: v})
                 
@@ -127,7 +127,7 @@ class Script(scripts.Script):
                 for r in result:
                     i = 0
                     for k in data.keys():
-                        a = ["width","height","cfg_scale","steps","clip_skip"]
+                        a = ["width","height","cfg_scale","steps","clip_skip","ENSD"]
                         if k in a:
                             job.update({k: int(r[i])})
                         elif k == "sampler":
