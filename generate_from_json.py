@@ -47,51 +47,40 @@ class Script(scripts.Script):
         return "Generate from json"
 
     def ui(self, is_img2img):
-        with gr.Row():
-            with gr.Column(variant='panel'):
-                with gr.Group():
-                    directory = gr.Textbox(label="Prompts Directory", value="prompts", interactive=True)
-                    open_directory = gr.Button("Open Prompts Directory")
-                    open_directory.click(
-                        fn=open_folder,
-                        inputs=directory,
-                        outputs=[],
-                    )
+        print_check = gr.Checkbox(label="Print Parameters to Console", value=False)
+        directory = gr.Textbox(label="Prompts Directory", value="prompts", interactive=True)
+        open_directory = gr.Button("Open Prompts Directory")
+        open_directory.click(
+            fn=open_folder,
+            inputs=directory,
+            outputs=[],
+        )
+        webp_check = gr.Checkbox(label="Output webp with upscale", value=False)
+        webp_quality_txt = gr.Textbox(label="Quality", value="75")
+        webp_directory = gr.Textbox(label="webp Directory", value="outputs_webp", interactive=True)
+        open_webp_directory = gr.Button("Open webp Directory")
+        open_webp_directory.click(
+            fn=open_folder,
+            inputs=webp_directory,
+            outputs=[],
+        )
+        resize_check = gr.Checkbox(label="Enable upscale", value=False)
+        upscaling_resize = gr.Slider(minimum=1.0, maximum=4.0, step=0.05, label="Scale by", value=1)
+        upscaling_resize_w = gr.Number(label="Scale to Width", value=0, precision=0)
+        upscaling_resize_h = gr.Number(label="Scale to Height", value=0, precision=0)
+        upscaling_crop = gr.Checkbox(label='Crop to fit', value=True)
+        extras_upscaler_1 = gr.Radio(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in shared.sd_upscalers], value=shared.sd_upscalers[0].name, type="index")
 
-                with gr.Group():
-                    webp_check = gr.Checkbox(label="Output webp with upscale", value=False)
-                    webp_quality_txt = gr.Textbox(label="Quality", value="75")
-                    webp_directory = gr.Textbox(label="webp Directory", value="outputs_webp", interactive=True)
-                    open_webp_directory = gr.Button("Open webp Directory")
-                    open_webp_directory.click(
-                        fn=open_folder,
-                        inputs=webp_directory,
-                        outputs=[],
-                    )
-                    with gr.Tabs(elem_id="extras_resize_mode"):
-                        with gr.Group():
-                            resize_check = gr.Checkbox(label="Enable upscale", value=False)
-                        with gr.TabItem('Scale by'):
-                            upscaling_resize = gr.Slider(minimum=1.0, maximum=4.0, step=0.05, label="Resize", value=2)
-                        with gr.TabItem('Scale to'):
-                            with gr.Group():
-                                with gr.Row():
-                                    upscaling_resize_w = gr.Number(label="Width", value=512, precision=0)
-                                    upscaling_resize_h = gr.Number(label="Height", value=512, precision=0)
-                                upscaling_crop = gr.Checkbox(label='Crop to fit', value=True)
-                    with gr.Group():
-                        extras_upscaler_1 = gr.Radio(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in shared.sd_upscalers], value=shared.sd_upscalers[0].name, type="index")
-
-        return [directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
+        return [print_check, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
                              resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1]
 
-    def on_show(self, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
+    def on_show(self, print_check, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
                      resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
         return [gr.Textbox.update(visible=True),
                 gr.Button.update(visible=True),
                 ]
 
-    def run(self, p, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
+    def run(self, p, print_check, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
                      resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
 
         def shift_attention(text, distance):
@@ -113,6 +102,7 @@ class Script(scripts.Script):
             with open(fn) as f:
                 data = json.load(f)
                 job = dict()
+                job.update({"name": os.path.splitext(os.path.basename(fn))[0]})
 
                 # その他の項目
                 for k, v in data.items():
@@ -173,7 +163,8 @@ class Script(scripts.Script):
 
                 # *tmp でリストを展開して突っ込む ここで項目が1要素でもリストにしておかないと文字列のリストとみなされる
                 result = list(itertools.product(*tmp, repeat=1))
-                pprint.pprint(result)
+                if print_check:
+                    pprint.pprint(result)
                 for r in result:
                     i = 0
                     for k in data.keys():
@@ -201,7 +192,10 @@ class Script(scripts.Script):
             copy_p = copy.copy(p)
             state.job = f"{i + 1} out of {state.job_count}"
             for k, v in job.items():
-                setattr(copy_p, k, v)
+                if (k == "name"):
+                    fn = v
+                else:
+                    setattr(copy_p, k, v)
 
             proc = process_images(copy_p)
 
@@ -232,8 +226,7 @@ class Script(scripts.Script):
                     res = upscale(image, extras_upscaler_1, upscaling_resize, resize_mode, upscaling_resize_w, upscaling_resize_h, upscaling_crop)
                     image = res
 
-                home_path = os.path.dirname(os.path.dirname(fn))
-                image.save(os.path.join(home_path, 'output_webp', f"{os.path.splitext(os.path.basename(fn))[0]}-{float(time.time())}.webp"), quality=int(webp_quality_txt))
+                image.save(os.path.join(webp_directory, f"{fn}-{float(time.time())}.webp"), quality=int(webp_quality_txt))
 
             images += proc.images
 
