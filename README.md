@@ -30,4 +30,3 @@
 
 - Hypernet, Hypernet strength, ENSDに対応したいが、processing.pyが対応してないのでしんどい。
 - Highres. fixにも対応してない? してそうだけど指定の仕方がわからない。
-- Scriptプルダウンの下に選択前からUIの残骸が表示されてしまっているが隠し方がわからない。
