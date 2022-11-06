@@ -83,6 +83,7 @@ class Script(scripts.Script):
     def run(self, p, print_check, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
                      resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
 
+        # prompt_countで使う
         def shift_attention(text, distance):
             re_attention_span = re.compile(r"([.\d]+)~([.\d]+)", re.X)
             def inject_value(distance, match_obj):
@@ -102,14 +103,16 @@ class Script(scripts.Script):
             with open(fn) as f:
                 data = json.load(f)
                 job = dict()
+                # webpをjsonファイル名で保存するのに使う
                 job.update({"name": os.path.splitext(os.path.basename(fn))[0]})
 
-                # その他の項目
+                # 想定外のkeyが来たらProcessedに渡してみる
                 for k, v in data.items():
                     a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler","eta","Hypernet","ENSD"]
                     if k not in a:
                         job.update({k: v})
 
+                # json に upscale の設定があれば上書きする
                 if ("upscaler" in data):
                     extras_upscaler_1 = data["upscaler"]
                     del data["upscaler"]
@@ -125,10 +128,12 @@ class Script(scripts.Script):
                         upscaling_crop = int(data["upscaling_crop"])
                         del data["upscaling_crop"]
 
+                # json に webp の設定があれば上書きする
                 if ("webp_quality" in data):
                     webp_quality = int(data["webp_quality"])
                     del data["webp_quality"]
 
+                # prompt_count が 2 以上なら強調の範囲指定を配列に変換する
                 if ("prompt_count" in data):
                     c = data["prompt_count"]
                     if c > 1:
@@ -204,6 +209,7 @@ class Script(scripts.Script):
                     break
                 image = image.convert("RGB")
 
+                # upscale処理 extras.py参照
                 def upscale(image, scaler_index, resize, mode, resize_w, resize_h, crop):
                     upscaler = shared.sd_upscalers[scaler_index]
                     c = upscaler.scaler.upscale(image, resize, upscaler.data_path)
@@ -215,9 +221,11 @@ class Script(scripts.Script):
                     return c
 
                 if resize_check:
+                    # 倍率が 1.0 のままなら width, height から倍率を算出
                     if upscaling_resize == 1.0:
                         resize_mode = 1
                         upscaling_resize = max(upscaling_resize_w/image.width, upscaling_resize_h/image.height)
+                    # 倍率が指定されていれば width, height を算出
                     else:
                         resize_mode = 0
                         upscaling_resize_w = image.width * upscaling_resize
@@ -226,6 +234,7 @@ class Script(scripts.Script):
                     res = upscale(image, extras_upscaler_1, upscaling_resize, resize_mode, upscaling_resize_w, upscaling_resize_h, upscaling_crop)
                     image = res
 
+                # webp の保存を image ごとにおこなう
                 image.save(os.path.join(webp_directory, f"{fn}-{float(time.time())}.webp"), quality=int(webp_quality_txt))
 
             images += proc.images
