@@ -12,14 +12,15 @@ import pprint
 import itertools
 import time
 
-import modules.scripts as scripts
+from PIL import Image, ImageDraw, ImageFont
+from glob import glob
 import gradio as gr
 
+import modules.scripts as scripts
+from modules import sd_samplers, sd_models, shared
 from modules.processing import Processed, process_images
-from PIL import Image
 from modules.shared import opts, cmd_opts, state
-from modules import sd_samplers, shared
-from glob import glob
+from modules.hypernetworks import hypernetwork
 
 
 def open_folder(f):
@@ -197,10 +198,16 @@ class Script(scripts.Script):
             copy_p = copy.copy(p)
             state.job = f"{i + 1} out of {state.job_count}"
             for k, v in job.items():
-                if (k == "name"):
-                    fn = v
-                else:
-                    setattr(copy_p, k, v)
+                match k:
+                    case "name":
+                        fn = v
+                    case "sd_model_hash":
+                        for c in sd_models.checkpoints_list.values():
+                            if c.hash == v:
+                                opts.sd_model_checkpoint = c.title
+                        sd_models.reload_model_weights()
+                    case _:
+                        setattr(copy_p, k, v)
 
             proc = process_images(copy_p)
 
