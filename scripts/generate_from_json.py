@@ -193,6 +193,13 @@ class Script(scripts.Script):
 
         state.job_count = batch_count
 
+        # Hypernetをnameから引けるように準備しておく
+        hs = {}
+        for filename in hypernetwork.list_hypernetworks(cmd_opts.hypernetwork_dir).values():
+            h = hypernetwork.Hypernetwork()
+            h.load(filename)
+            hs[h.name] = filename
+
         images = []
         for i, job in enumerate(jobs):
             copy_p = copy.copy(p)
@@ -206,6 +213,17 @@ class Script(scripts.Script):
                             if c.hash == v:
                                 opts.sd_model_checkpoint = c.title
                         sd_models.reload_model_weights()
+                    case "hypernet":
+                        if v == "None":
+                            shared.loaded_hypernetwork = None
+                            continue
+                        if shared.loaded_hypernetwork != None and shared.loaded_hypernetwork.name == v:
+                            continue
+                        for hn, hf in hs.items():
+                            if hn == v:
+                                shared.loaded_hypernetwork = hypernetwork.Hypernetwork()
+                                shared.loaded_hypernetwork.load(hf)
+                                break
                     case "hypernet_strength":
                         opts.sd_hypernetwork_strength = float(v)
                     case "ensd":
