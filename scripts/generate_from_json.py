@@ -109,7 +109,7 @@ class Script(scripts.Script):
 
                 # 想定外のkeyが来たらProcessedに渡してみる
                 for k, v in data.items():
-                    a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler","eta","Hypernet","ENSD"]
+                    a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler","eta","hypernet","hypernet_strength","ensd"]
                     if k not in a:
                         job.update({k: v})
 
@@ -174,9 +174,9 @@ class Script(scripts.Script):
                 for r in result:
                     i = 0
                     for k in data.keys():
-                        if k in ["width","height","cfg_scale","steps","clip_skip","ENSD"]:
+                        if k in ["width","height","cfg_scale","steps","clip_skip","ensd"]:
                             job.update({k: int(r[i])})
-                        elif k in ["eta"]:
+                        elif k in ["hypernet_strength", "eta"]:
                             job.update({k: float(r[i])})
                         elif k == "sampler":
                             for idx, name in enumerate(sd_samplers.samplers):
@@ -206,6 +206,10 @@ class Script(scripts.Script):
                             if c.hash == v:
                                 opts.sd_model_checkpoint = c.title
                         sd_models.reload_model_weights()
+                    case "hypernet_strength":
+                        opts.sd_hypernetwork_strength = float(v)
+                    case "ensd":
+                        opts.eta_noise_seed_delta = v
                     case _:
                         setattr(copy_p, k, v)
 
