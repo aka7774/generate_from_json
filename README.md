@@ -17,11 +17,28 @@
 ## jsonファイルについて
 
 - example.json に記載されているkeyが使用できる
-  - 省略時はweb UIで指定した値が適用されるはず
-  - 将来対応可能なのは modules/processing.py の Processed の js にあるもの
+  - 省略時はweb UIで指定した値が適用される
+- txt2imgの画面に存在しない項目は、処理時に設定自体を書き換えるので注意。
+  - sd_model_hash
+  - eta
+  - ensd
+
+### 複数生成の指定
+
 - value を配列にすると、それぞれの要素に対して画像を生成する
   - 型は厳密に記載してください(数値型なら""をつけない)
   - たとえば {"cfg_scale": [3,4,5], "steps": [20,28]} なら、3x2=6枚出す
+  - 順番は以下のようになる。
+    - {"cfg_scale": 3, "steps": 20}
+    - {"cfg_scale": 3, "steps": 28}
+    - {"cfg_scale": 4, "steps": 20}
+    - {"cfg_scale": 4, "steps": 28}
+    - {"cfg_scale": 5, "steps": 20}
+    - {"cfg_scale": 5, "steps": 28}
+
+### sd_model_hashは先頭に書きましょう
+
+- 切り替わるたびにモデルをロードし直します。
 
 ### prompt_countによる強調変化機能
 
@@ -55,6 +72,9 @@
 
 ## ToDo List
 
-- Hypernet, Hypernet strength, ENSDに対応したいが、processing.pyが対応してないのでしんどい。
+- Hypernet, Hypernet strengthに対応する予定。
+
+## 対応しなさそうなリスト
+
 - Highres. fixには対応できそうだけどしてない。
 - Extensionにするほどユーザーが増えそうなイメージが無いのでとりあえずScriptのまま。
