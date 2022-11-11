@@ -46,9 +46,9 @@
     - {"cfg_scale": 5, "steps": 20}
     - {"cfg_scale": 5, "steps": 28}
 
-### sd_model_hashは先頭に書きましょう
+### sd_model_hashとhypernetは先頭に書きましょう
 
-- 切り替わるたびにモデルをロードし直します。
+- 切り替わるたびにロードし直すので時間がかかります。
 
 ### prompt_countによる強調変化機能
 
