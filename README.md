@@ -10,16 +10,26 @@
 ## 操作方法
 
 - webui直下にpromptsディレクトリを作って拡張子をjsonにしたファイルを入れる
+  - 書式とキーはexample.jsonを参考にする。
+  - 値はPNG Infoから取ってくる。
 - txt2imgのScriptで「Generate from json」を選択し、generateボタンを押す
 - フォルダに入れたすべてのjsonファイルを対象に処理を行う
   - glob() のデフォルト順なのでたぶん昇順ソート
 
 ## jsonファイルについて
 
-- example.json に記載されているkeyが使用できる
+- キーは省略可能
   - 省略時はweb UIで指定した値が適用される
-- txt2imgの画面に存在しない項目は、処理時に設定自体を書き換えるので注意。
+- valueはPNG Infoで取得できるParametersの値に準じている
+  - モデル指定は sd_model_hash で8文字のハッシュ
+  - サンプラー指定はラジオボタンで選択する部分の表示名
+  - hypernetは内部名称(ファイル名ではないので注意)
+    - "None" を指定すると None になる
+  - こんなにバラバラになってるのは元仕様のせいです
+- txt2imgの画面に存在しない項目は、処理時にSettingsの値自体を書き換えるので注意
   - sd_model_hash
+  - hypernet
+  - hypernet_strength
   - eta
   - ensd
 
@@ -48,7 +58,9 @@
 
 ## webpとupscale
 
-- webp形式で出力できる(デプロイ用機能なので不要ならスルー推奨)
+この機能は消すか迷っている。
+
+- webp形式で出力できる
   - ファイルサイズが少なくなる
   - PNG Infoは失われる
 - 本来の出力には全く影響を及ぼさない
@@ -70,11 +82,7 @@
   - 複数のparametersを1ファイルにまとめる機能とかは考えてない
   - 配列を一次元増やすような改造はそんなに難しくないような
 
-## ToDo List
-
-- Hypernet, Hypernet strengthに対応する予定。
-
 ## 対応しなさそうなリスト
 
-- Highres. fixには対応できそうだけどしてない。
+- Highres. fixには対応できそうだけど使う予定がないので実装してない。
 - Extensionにするほどユーザーが増えそうなイメージが無いのでとりあえずScriptのまま。
