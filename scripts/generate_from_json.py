@@ -23,6 +23,7 @@ from modules.shared import opts, cmd_opts, state
 from modules.hypernetworks import hypernetwork
 
 
+
 def open_folder(f):
     if not os.path.isdir(f):
         print(f"""
@@ -48,7 +49,6 @@ class Script(scripts.Script):
         return "Generate from json"
 
     def ui(self, is_img2img):
-        print_check = gr.Checkbox(label="Print Parameters to Console", value=False)
         directory = gr.Textbox(label="Prompts Directory", value="prompts", interactive=True)
         open_directory = gr.Button("Open Prompts Directory")
         open_directory.click(
@@ -56,35 +56,16 @@ class Script(scripts.Script):
             inputs=directory,
             outputs=[],
         )
-        webp_check = gr.Checkbox(label="Output webp with upscale", value=False)
-        webp_quality_txt = gr.Textbox(label="Quality", value="75")
-        webp_directory = gr.Textbox(label="webp Directory", value="outputs_webp", interactive=True)
-        open_webp_directory = gr.Button("Open webp Directory")
-        open_webp_directory.click(
-            fn=open_folder,
-            inputs=webp_directory,
-            outputs=[],
-        )
-        resize_check = gr.Checkbox(label="Enable upscale", value=False)
-        upscaling_resize = gr.Slider(minimum=1.0, maximum=4.0, step=0.05, label="Scale by", value=1)
-        upscaling_resize_w = gr.Number(label="Scale to Width", value=0, precision=0)
-        upscaling_resize_h = gr.Number(label="Scale to Height", value=0, precision=0)
-        upscaling_crop = gr.Checkbox(label='Crop to fit', value=True)
-        extras_upscaler_1 = gr.Radio(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in shared.sd_upscalers], value=shared.sd_upscalers[0].name, type="index")
 
-        return [print_check, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
-                             resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1]
+        return [directory, open_directory]
 
-    def on_show(self, print_check, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
-                     resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
+    def on_show(self, directory, open_directory):
         return [gr.Textbox.update(visible=True),
                 gr.Button.update(visible=True),
                 ]
 
-    def run(self, p, print_check, directory, open_directory, webp_check, webp_quality_txt, webp_directory, open_webp_directory,
-                     resize_check, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1):
+    def run(self, p, directory, open_directory):
 
-        # prompt_countで使う
         def shift_attention(text, distance):
             re_attention_span = re.compile(r"([.\d]+)~([.\d]+)", re.X)
             def inject_value(distance, match_obj):
@@ -97,44 +78,68 @@ class Script(scripts.Script):
 
         p.do_not_save_grid = True
 
-        files = glob(directory + "/*.json")
+        # webp出力機能
+        webp_directory = None
+        config_json = directory + "/config.json"
+        if os.path.exists(config_json):
+            f = open(config_json)
+            data = json.load(f)
 
+            if ("webp_directory" in data):
+                webp_directory = data["webp_directory"]
+            if ("webp_quality" in data):
+                webp_quality = int(data["webp_quality"])
+
+            if ("upscaler" in data):
+                i = 0
+                for upscaler in shared.sd_upscalers:
+                    if upscaler.name == data["upscaler"]:
+                        extras_upscaler_1 = i
+                        break
+                    i += 1
+                
+            if ("upscaling_resize" in data):
+                upscaling_resize = float(data["upscaling_resize"])
+            if ("upscaling_resize_w" in data):
+                upscaling_resize_w = int(data["upscaling_resize_w"])
+            if ("upscaling_resize_h" in data):
+                upscaling_resize_h = int(data["upscaling_resize_h"])
+            if ("upscaling_crop" in data):
+                upscaling_crop = int(data["upscaling_crop"])
+
+            if ("imagefont_truetype" in data):
+                imagefont_truetype = data["imagefont_truetype"]
+            if ("imagefont_truetype_index" in data):
+                imagefont_truetype_index = int(data["imagefont_truetype_index"])
+            if ("imagefont_truetype_size" in data):
+                imagefont_truetype_size = int(data["imagefont_truetype_size"])
+
+            if ("draw_text_left" in data):
+                draw_text_left = int(data["draw_text_left"])
+            if ("draw_text_top" in data):
+                draw_text_top = int(data["draw_text_top"])
+            if ("draw_text_color" in data):
+                draw_text_color = data["draw_text_color"]
+            if ("draw_text" in data):
+                draw_text = data["draw_text"]
+                
+        # prompts/json読み込み
+        files = glob(directory + "/*.json")
         jobs = []
         for fn in files:
+            if os.path.basename(fn) == "config.json":
+                continue
             with open(fn) as f:
                 data = json.load(f)
                 job = dict()
-                # webpをjsonファイル名で保存するのに使う
                 job.update({"name": os.path.splitext(os.path.basename(fn))[0]})
 
-                # 想定外のkeyが来たらProcessedに渡してみる
+                # その他の項目
                 for k, v in data.items():
                     a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler","eta","hypernet","hypernet_strength","ensd"]
                     if k not in a:
                         job.update({k: v})
 
-                # json に upscale の設定があれば上書きする
-                if ("upscaler" in data):
-                    extras_upscaler_1 = data["upscaler"]
-                    del data["upscaler"]
-                    if (data["upscaling_resize"]):
-                        upscaling_resize = float(data["upscaling_resize"])
-                        del data["upscaling_resize"]
-                    if ("upscaling_resize_w" in data):
-                        upscaling_resize_w = int(data["upscaling_resize_w"])
-                        upscaling_resize_h = int(data["upscaling_resize_h"])
-                        del data["upscaling_resize_w"]
-                        del data["upscaling_resize_h"]
-                    if ("upscaling_crop" in data):
-                        upscaling_crop = int(data["upscaling_crop"])
-                        del data["upscaling_crop"]
-
-                # json に webp の設定があれば上書きする
-                if ("webp_quality" in data):
-                    webp_quality = int(data["webp_quality"])
-                    del data["webp_quality"]
-
-                # prompt_count が 2 以上なら強調の範囲指定を配列に変換する
                 if ("prompt_count" in data):
                     c = data["prompt_count"]
                     if c > 1:
@@ -169,8 +174,7 @@ class Script(scripts.Script):
 
                 # *tmp でリストを展開して突っ込む ここで項目が1要素でもリストにしておかないと文字列のリストとみなされる
                 result = list(itertools.product(*tmp, repeat=1))
-                if print_check:
-                    pprint.pprint(result)
+                # pprint.pprint(result)
                 for r in result:
                     i = 0
                     for k in data.keys():
@@ -234,11 +238,11 @@ class Script(scripts.Script):
             proc = process_images(copy_p)
 
             for image in proc.images:
-                if webp_check == False:
+                if webp_directory == None:
                     break
                 image = image.convert("RGB")
 
-                # upscale処理 extras.py参照
+                # webp upscale
                 def upscale(image, scaler_index, resize, mode, resize_w, resize_h, crop):
                     upscaler = shared.sd_upscalers[scaler_index]
                     c = upscaler.scaler.upscale(image, resize, upscaler.data_path)
@@ -249,12 +253,10 @@ class Script(scripts.Script):
 
                     return c
 
-                if resize_check:
-                    # 倍率が 1.0 のままなら width, height から倍率を算出
+                if extras_upscaler_1 > 0:
                     if upscaling_resize == 1.0:
                         resize_mode = 1
                         upscaling_resize = max(upscaling_resize_w/image.width, upscaling_resize_h/image.height)
-                    # 倍率が指定されていれば width, height を算出
                     else:
                         resize_mode = 0
                         upscaling_resize_w = image.width * upscaling_resize
@@ -263,8 +265,17 @@ class Script(scripts.Script):
                     res = upscale(image, extras_upscaler_1, upscaling_resize, resize_mode, upscaling_resize_w, upscaling_resize_h, upscaling_crop)
                     image = res
 
-                # webp の保存を image ごとにおこなう
-                image.save(os.path.join(webp_directory, f"{fn}-{float(time.time())}.webp"), quality=int(webp_quality_txt))
+                # webp text
+                draw = ImageDraw.Draw(image)
+                font = ImageFont.truetype(imagefont_truetype, index=imagefont_truetype_index, size=imagefont_truetype_size)
+                draw.text((draw_text_left, draw_text_top), draw_text, draw_text_color, font=font)
+
+                # webp save
+                webp_dst = os.path.join(webp_directory, f"{fn}.webp")
+                if os.path.exists(webp_dst):
+                    image.save(os.path.join(webp_directory, f"{fn}-{float(time.time())}.webp"), quality=webp_quality)
+                else:
+                    image.save(webp_dst, quality=webp_quality)
 
             images += proc.images
 
