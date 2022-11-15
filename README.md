@@ -5,7 +5,18 @@
 - webui automatic1111用のScript
 - 1枚の絵に対して色んなParameterを指定した複数の画像を生成できる
   - SamplerやStepsやPromptの強調を変えたりして変化を確認できる
-- generate foreverして放置すればガチャにも便利
+
+## 活用イメージ
+
+- 1枚の絵に対して設定を詰めて追求する
+- generate foreverしてガチャ放置する
+- 新しいモデルに対して貯蔵してたプロンプトを一括で試す
+などなど
+
+## 制限事項
+
+- hypernetの内部名称を取得するために、処理開始時に一度すべてのhypernetをロードする
+  - models/hypernetworks 内にファイルが沢山あると時間がかかるかも
 
 ## 操作方法
 
@@ -18,7 +29,7 @@
 
 ## jsonファイルについて
 
-- キーは省略可能
+- keyは省略可能
   - 省略時はweb UIで指定した値が適用される
 - valueはPNG Infoで取得できるParametersの値に準じている
   - モデル指定は sd_model_hash で8文字のハッシュ
@@ -26,6 +37,8 @@
   - hypernetは内部名称(ファイル名ではないので注意)
     - "None" を指定すると None になる
   - こんなにバラバラになってるのは元仕様のせいです
+- sd_model_hashとhypernetは先頭に書きましょう
+  - 切り替わるたびにロードし直すので時間がかかります。
 - txt2imgの画面に存在しない項目は、処理時にSettingsの値自体を書き換えるので注意
   - sd_model_hash
   - hypernet
@@ -45,10 +58,6 @@
     - {"cfg_scale": 4, "steps": 28}
     - {"cfg_scale": 5, "steps": 20}
     - {"cfg_scale": 5, "steps": 28}
-
-### sd_model_hashとhypernetは先頭に書きましょう
-
-- 切り替わるたびにロードし直すので時間がかかります。
 
 ### prompt_countによる強調変化機能
 
