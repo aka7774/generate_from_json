@@ -3,6 +3,7 @@
 ## What is this?
 
 - webui automatic1111用のScript
+- 複数の絵をバッチ的に出せる(Prompts from fileの強化版)
 - 1枚の絵に対して色んなParameterを指定した複数の画像を生成できる
   - SamplerやStepsやPromptの強調を変えたりして変化を確認できる
 
