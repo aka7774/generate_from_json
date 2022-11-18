@@ -208,6 +208,13 @@ class Script(scripts.Script):
         for i, job in enumerate(jobs):
             copy_p = copy.copy(p)
             state.job = f"{i + 1} out of {state.job_count}"
+
+            # use default values
+            opts.eta_noise_seed_delta = 0
+            opts.sd_hypernetwork_strength = 1.0
+            opts.eta_ddim = 0.0
+            opts.eta_ancestral = 1.0
+
             for k, v in job.items():
                 match k:
                     case "name":
