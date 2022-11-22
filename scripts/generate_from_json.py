@@ -81,8 +81,7 @@ class Script(scripts.Script):
         # webp出力機能
         webp_directory = None
         config_json = directory + "/config.json"
-        if os.path.exists(config_json):
-            f = open(config_json)
+        with open(config_json) as f:
             data = json.load(f)
 
             if ("webp_directory" in data):
@@ -122,6 +121,7 @@ class Script(scripts.Script):
                 draw_text_color = data["draw_text_color"]
             if ("draw_text" in data):
                 draw_text = data["draw_text"]
+            del data
                 
         # prompts/json読み込み
         files = glob(directory + "/*.json")
@@ -203,6 +203,7 @@ class Script(scripts.Script):
             h = hypernetwork.Hypernetwork()
             h.load(filename)
             hs[h.name] = filename
+            del h
 
         images = []
         for i, job in enumerate(jobs):
