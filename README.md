@@ -3,6 +3,8 @@
 ## Install
 
 - Script Extensions for webui automatic1111
+  - Extenstions tab - Install from URL
+  - https://github.com/aka7774/generate_from_json.git
 
 - 手動でScriptsに入れても動きます
   - Extensionsとして使う場合は Scripts/generate_from_json.pyは消してください
