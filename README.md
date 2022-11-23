@@ -2,15 +2,9 @@
 
 ## Install
 
-- Script Extensions for webui automatic1111
+- Extensions for webui automatic1111
   - Extenstions tab - Install from URL
   - https://github.com/aka7774/generate_from_json.git
-
-- 手動でScriptsに入れても動きます
-  - Extensionsとして使う場合は Scripts/generate_from_json.pyは消してください
-
-- It will work even if you put it in Scripts manually.
-  - If you use it as Extensions, please delete Scripts/generate_from_json.py  
 
 ## これは何か What is this?
 
@@ -45,14 +39,14 @@
 
 ## 操作方法 How to operate
 
-- webui直下にpromptsディレクトリを作って拡張子をjsonにしたファイルを入れる
+- extensions/generate_from_json/json ディレクトリに拡張子をjsonにしたファイルを入れる
   - 書式とキーはexample.jsonを参考にする。
   - 値はPNG Infoから取ってくる。
 - txt2imgのScriptで「Generate from json」を選択し、generateボタンを押す
 - フォルダに入れたすべてのjsonファイルを対象に処理を行う
   - glob() のデフォルト順なのでたぶん昇順ソート
 
-- Create a prompts directory under webui and put in a file with json extension.
+- Put files with json extension in extensions/generate_from_json/json directory
   - Refer to example.json for format and keys.
   - Get the value from PNG Info.
 - Select "Generate from json" in Script of txt2img and press generate button.
