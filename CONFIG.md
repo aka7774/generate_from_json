@@ -3,6 +3,10 @@
 - ガチャするのには使わんはず
 - 生成したものを一括で拡大したいだけならExtrasのBetch from Directoryのほうが便利
 
+## Install
+
+- Extensionsとしてインストールした場合、出力先フォルダ(デフォルトはwebui直下のoutputs_webp)を先に手動で作成してください。
+
 ## 概要
 
 - webp形式で出力できる

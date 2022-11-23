@@ -1,8 +1,18 @@
 # generate_from_json
 
-## これは何か What is this?
+## Install
 
-- Script for webui automatic1111
+- Script Extensions for webui automatic1111
+  - Extenstions tab - Install from URL
+  - https://github.com/aka7774/generate_from_json.git
+
+- 手動でScriptsに入れても動きます
+  - Extensionsとして使う場合は Scripts/generate_from_json.pyは消してください
+
+- It will work even if you put it in Scripts manually.
+  - If you use it as Extensions, please delete Scripts/generate_from_json.py  
+
+## これは何か What is this?
 
 - 複数の絵をバッチ的に出せる(Prompts from fileの強化版)
 - 1枚の絵に対して色んなParameterを指定した複数の画像を生成できる
@@ -137,4 +147,3 @@
 ## 対応しなさそうなリスト
 
 - Highres. fixには対応できそうだけど使う予定がないので実装してない。
-- Extensionにするほどユーザーが増えそうなイメージが無いのでとりあえずScriptのまま。
