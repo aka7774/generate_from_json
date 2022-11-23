@@ -2,6 +2,7 @@
 
 - ガチャするのには使わんはず
 - 生成したものを一括で拡大したいだけならExtrasのBetch from Directoryのほうが便利
+- 単にwebpで出したいだけならSettingsのFile format for imagesにwebpと入れれば済む
 
 ## 概要
 
