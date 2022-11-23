@@ -1,5 +1,4 @@
 {
-    "webp_directory": "outputs_webp",
     "webp_quality": 90,
     "upscaler": "R-ESRGAN 2x+",
     "upscaling_resize": 2,
