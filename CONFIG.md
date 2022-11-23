@@ -3,10 +3,6 @@
 - ガチャするのには使わんはず
 - 生成したものを一括で拡大したいだけならExtrasのBetch from Directoryのほうが便利
 
-## Install
-
-- Extensionsとしてインストールした場合、出力先フォルダ(デフォルトはwebui直下のoutputs_webp)を先に手動で作成してください。
-
 ## 概要
 
 - webp形式で出力できる
@@ -17,19 +13,18 @@
 - upscaleはwebpに対してのみ有効
   - 本来の出力に対してはupscaleは効かない
 - 文字入れ機能
-- UIからの設定は無くなりました
 - webp出力先でファイル名が重複した場合のみ、ファイル名にタイムスタンプを付与
 
 ## 使い方
 
-- config.jsonをpromptsに移動する
-  - prompts/config.json が無ければこの機能は使われない
+- extensions/generate_from_json/Examples/config.json を extensions/generate_from_json/ に移動する
 - 中身を編集する
+- Generateする
+- extensions/generate_from_json/webp に加工後の画像が出力される
 
 ### 中身
 
 webp設定
-- "webp_directory": str 出力先フォルダ。webui直下に作る。
 - "webp_quality": int webpの画質。
 
 拡大機能
