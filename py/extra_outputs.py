@@ -37,8 +37,6 @@ def extra_outputs(fn, images):
     with open(const.CONFIG_FILE) as f:
         data = json.load(f)
 
-        if ("webp_directory" in data):
-            webp_directory = data["webp_directory"]
         if ("webp_quality" in data):
             webp_quality = int(data["webp_quality"])
 
@@ -76,9 +74,10 @@ def extra_outputs(fn, images):
             draw_text = data["draw_text"]
         del data
 
+    if webp_quality == None:
+        return images
+
     for image in images:
-        if webp_directory == None:
-            break
         image = image.convert("RGB")
 
         if extras_upscaler_1 > 0:

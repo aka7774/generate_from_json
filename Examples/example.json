@@ -13,5 +13,8 @@
     "prompt_count": 5,
     "hypernet_strength": [0.5,1],
     "eta": [0.67, 1],
-    "ensd": [0,31337]
+    "ensd": [0,31337],
+	"seed_resize_from_w": [512],
+    "seed_resize_from_h": [512],
+    "denoising_strength": [0.7]
 }
