@@ -1,9 +1,0 @@
-{
-    "width": [1024],
-    "height": [1024],
-    "prompt": "(masterpiece), (((best quality, intricate))), watercolor, ((blunt bangs, open black eyes, black very long hair, hair flower red rose, lace, lace trim)), [[[[black pupils, eyelashes]]]], (red dress, frills, gothic lolita, short skirt, bowknot, stocking, garter, cross-laced footwear, ribbon-trimmed sleeves), faint lips, navel, nail polish, red nails",
-    "negative_prompt": "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry",
-    "seed_resize_from_w": [512],
-    "seed_resize_from_h": [512],
-    "denoising_strength": [0.7]
-}

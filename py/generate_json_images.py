@@ -55,7 +55,7 @@ def generate_json_images(p):
 
             for k, v in data.items():
                 # aは複数指定に対応させる項目
-                a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler","eta","hypernet","hypernet_strength","ensd","seed_resize_from_w","seed_resize_from_h","denoising_strength"]
+                a = ["width","height","cfg_scale","steps","sd_model_hash","clip_skip","sampler","eta","hypernet","hypernet_strength","ensd","subseed","subseed_strength","seed_resize_from_w","seed_resize_from_h","denoising_strength"]
                 # a以外はそのままstrで渡してみる
                 if k not in a:
                     job.update({k: v})
@@ -98,9 +98,9 @@ def generate_json_images(p):
             for r in result:
                 i = 0
                 for k in data.keys():
-                    if k in ["width","height","cfg_scale","steps","clip_skip","ensd","seed_resize_from_w","seed_resize_from_h"]:
+                    if k in ["width","height","cfg_scale","steps","clip_skip","ensd","subseed","seed_resize_from_w","seed_resize_from_h"]:
                         job.update({k: int(r[i])})
-                    elif k in ["hypernet_strength", "eta","denoising_strength"]:
+                    elif k in ["hypernet_strength", "eta","subseed_strength","denoising_strength"]:
                         job.update({k: float(r[i])})
                     elif k == "sampler":
                         for idx, name in enumerate(sd_samplers.samplers):

@@ -37,6 +37,7 @@ def extra_outputs(fn, images):
     with open(const.CONFIG_FILE) as f:
         data = json.load(f)
 
+        webp_quality = None
         if ("webp_quality" in data):
             webp_quality = int(data["webp_quality"])
 
