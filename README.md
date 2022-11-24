@@ -55,27 +55,42 @@
 
 ## jsonファイルについて About json files
 
+- sd_model_hashとhypernetは先頭に書きましょう
+  - 切り替わるたびにロードし直すので時間がかかります。
 - keyは省略可能
   - 省略時はweb UIで指定した値が適用される
 - valueはPNG Infoで取得できるParametersの値に準じている
-  - モデル指定は sd_model_hash で8文字のハッシュ
-  - サンプラー指定はラジオボタンで選択する部分の表示名
-  - hypernetは内部名称(ファイル名ではないので注意)
-    - "None" を指定すると None になる
-  - こんなにバラバラになってるのは元仕様のせいです
-- sd_model_hashとhypernetは先頭に書きましょう
-  - 切り替わるたびにロードし直すので時間がかかります。
+
+    "sd_model_hash": ckpt の sd_model_hash (8文字)
+    "hypernet": pt の内部名称(ファイル名ではないので注意) もしくは "None"
+    "steps": Sampling Steps
+    "sampler": Sampling method
+    "cfg_scale": CFG Scale
+    "width": Width
+    "height": Height
+    "seed": Seed
+    "clip_skip": Settings - Stop At last layers of CLIP model
+    "prompt": 
+    "negative_prompt": 
+    "prompt_count": (オリジナル機能。後述)
+    "hypernet_strength": Settings - Hypernetwork strength
+    "eta": Settings - eta (noise multiplier) for (DDIM/PLMS or ancestral samplers)
+    "ensd": Settings - Eta noise seed delta
+    "subseed": Extra - Variation seed
+    "subseed_strength": Extra - Variation strength
+    "seed_resize_from_w": Extra - Resize seed from width
+    "seed_resize_from_h": Extra - Resize seed from height
+    "denoising_strength": Highres. fix - Denoising strength
+
 - txt2imgの画面に存在しない項目は、処理時にSettingsの値自体を書き換えるので注意
   - sd_model_hash
   - hypernet
   - hypernet_strength
   - eta
   - ensd
-- 以下の項目は設定できるけど単体では使い物にならなさそう
-  - seed_resize_from_w Extraチェックボックスの中にある項目
-  - seed_resize_from_h 同上
-  - denoising_strength Highres. fixチェックボックスの中にある項目
   
+- sd_model_hash and hypernet should be written at the top
+  - It takes time to reload each time it switches.
 - key can be omitted.
   - If omitted, the value specified in the web UI is applied.
 - value is the same as the Parameters value that can be obtained from PNG Info
@@ -84,8 +99,6 @@
   - hypernet is the internal name (note that it is not a file name)
     - "None" is used to specify None
   - The reason it's all so disjointed is due to the original spec.
-- sd_model_hash and hypernet should be written at the top
-  - It takes time to reload each time it switches.
 - Note that if an item does not exist in the txt2img screen, the Settings value itself will be rewritten during processing.
   - sd_model_hash
   - hypernet
