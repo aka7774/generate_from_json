@@ -160,3 +160,8 @@
 - But it is just an image that one picture is completed in one file.
   - I'm not thinking of a function to combine multiple parameters into one file.
   - I don't think it's so difficult to modify it to add one dimension to the array.
+
+### Highres. fixは出来ないの？
+
+Scriptsからは出来ないうんち。
+uiの値を見てるので、uiで設定すれば反映される。
