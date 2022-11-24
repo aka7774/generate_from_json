@@ -61,6 +61,8 @@
   - 省略時はweb UIで指定した値が適用される
 - valueはPNG Infoで取得できるParametersの値に準じている
 
+- 各項目の意味
+```JSON
     "sd_model_hash": ckpt の sd_model_hash (8文字)
     "hypernet": pt の内部名称(ファイル名ではないので注意) もしくは "None"
     "steps": Sampling Steps
@@ -81,6 +83,7 @@
     "seed_resize_from_w": Extra - Resize seed from width
     "seed_resize_from_h": Extra - Resize seed from height
     "denoising_strength": Highres. fix - Denoising strength
+```
 
 - txt2imgの画面に存在しない項目は、処理時にSettingsの値自体を書き換えるので注意
   - sd_model_hash
@@ -112,12 +115,15 @@
   - 型は厳密に記載してください(数値型なら""をつけない)
   - たとえば {"cfg_scale": [3,4,5], "steps": [20,28]} なら、3x2=6枚出す
   - 順番は以下のようになる。
-    - {"cfg_scale": 3, "steps": 20}
-    - {"cfg_scale": 3, "steps": 28}
-    - {"cfg_scale": 4, "steps": 20}
-    - {"cfg_scale": 4, "steps": 28}
-    - {"cfg_scale": 5, "steps": 20}
-    - {"cfg_scale": 5, "steps": 28}
+
+```
+{"cfg_scale": 3, "steps": 20}
+{"cfg_scale": 3, "steps": 28}
+{"cfg_scale": 4, "steps": 20}
+{"cfg_scale": 4, "steps": 28}
+{"cfg_scale": 5, "steps": 20}
+{"cfg_scale": 5, "steps": 28}
+```
 
 - If value is an array, an image is generated for each element.
   - Type must be strictly specified (no "" if it is a numeric type)
