@@ -14,6 +14,8 @@
     "hypernet_strength": [0.5,1],
     "eta": [0.67, 1],
     "ensd": [0,31337],
+    "subseed": [123456],
+    "subseed_strength": [0.6],
 	"seed_resize_from_w": [512],
     "seed_resize_from_h": [512],
     "denoising_strength": [0.7]
