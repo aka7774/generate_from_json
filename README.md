@@ -71,6 +71,10 @@
   - hypernet_strength
   - eta
   - ensd
+- 以下の項目は設定できるけど単体では使い物にならなさそう
+  - seed_resize_from_w Extraチェックボックスの中にある項目
+  - seed_resize_from_h 同上
+  - denoising_strength Highres. fixチェックボックスの中にある項目
   
 - key can be omitted.
   - If omitted, the value specified in the web UI is applied.
@@ -137,7 +141,3 @@
 - But it is just an image that one picture is completed in one file.
   - I'm not thinking of a function to combine multiple parameters into one file.
   - I don't think it's so difficult to modify it to add one dimension to the array.
-
-## 対応しなさそうなリスト
-
-- Highres. fixには対応できそうだけど使う予定がないので実装してない。
