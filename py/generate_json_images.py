@@ -131,31 +131,30 @@ def generate_json_images(p):
         opts.eta_ancestral = 1.0
 
         for k, v in job.items():
-            match k:
-                case "name":
-                    fn = v
-                case "sd_model_hash":
-                    for c in sd_models.checkpoints_list.values():
-                        if c.hash == v:
-                            opts.sd_model_checkpoint = c.title
-                    sd_models.reload_model_weights()
-                case "hypernet":
-                    if v == "None":
-                        shared.loaded_hypernetwork = None
-                        continue
-                    if shared.loaded_hypernetwork != None and shared.loaded_hypernetwork.name == v:
-                        continue
-                    for hn, hf in hs.items():
-                        if hn == v:
-                            shared.loaded_hypernetwork = hypernetwork.Hypernetwork()
-                            shared.loaded_hypernetwork.load(hf)
-                            break
-                case "hypernet_strength":
-                    opts.sd_hypernetwork_strength = float(v)
-                case "ensd":
-                    opts.eta_noise_seed_delta = v
-                case _:
-                    setattr(copy_p, k, v)
+            if k == "name":
+                fn = v
+            elif k == "sd_model_hash":
+                for c in sd_models.checkpoints_list.values():
+                    if c.hash == v:
+                        opts.sd_model_checkpoint = c.title
+                sd_models.reload_model_weights()
+            elif k == "hypernet":
+                if v == "None":
+                    shared.loaded_hypernetwork = None
+                    continue
+                if shared.loaded_hypernetwork != None and shared.loaded_hypernetwork.name == v:
+                    continue
+                for hn, hf in hs.items():
+                    if hn == v:
+                        shared.loaded_hypernetwork = hypernetwork.Hypernetwork()
+                        shared.loaded_hypernetwork.load(hf)
+                        break
+            elif k == "hypernet_strength":
+                opts.sd_hypernetwork_strength = float(v)
+            elif k == "ensd":
+                opts.eta_noise_seed_delta = v
+            else:
+                setattr(copy_p, k, v)
 
         proc = process_images(copy_p)
         extra_outputs(fn, proc.images)
