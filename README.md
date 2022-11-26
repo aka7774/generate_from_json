@@ -6,6 +6,11 @@
   - Extenstions tab - Install from URL
   - https://github.com/aka7774/generate_from_json.git
 
+### Require Python 3.9 or 3.10
+
+- for Cloud miniconda
+- for Windows
+
 ## これは何か What is this?
 
 - 複数の絵をバッチ的に出せる(Prompts from fileの強化版)
