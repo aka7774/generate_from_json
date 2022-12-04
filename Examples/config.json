@@ -1,0 +1,15 @@
+{
+    "webp_quality": 90,
+    "upscaler": "R-ESRGAN 2x+",
+    "upscaling_resize": 2,
+    "upscaling_resize_w": 1920,
+    "upscaling_resize_h": 960,
+    "upscaling_crop": 0,
+    "imagefont_truetype": "BIZ-UDGothicR.ttc",
+    "imagefont_truetype_index": 0,
+    "imagefont_truetype_size": 32,
+    "draw_text_left": 100,
+    "draw_text_top": 100,
+    "draw_text_color": "red",
+    "draw_text": "Generate from json by aka7774"
+}

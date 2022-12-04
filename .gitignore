@@ -1,6 +1,5 @@
-config.json
-json/
-webp/
+json/*.json
+webp/*.webp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
