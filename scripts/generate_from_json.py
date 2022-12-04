@@ -1,33 +1,16 @@
-import math
 import os
 import sys
-import traceback
-import random
-import json
 import platform
 import subprocess as sp
-import copy
-import re
-import pprint
-import itertools
-import time
 
-from PIL import Image, ImageDraw, ImageFont
-from glob import glob
 import gradio as gr
 
 import modules.scripts as scripts
-from modules import sd_samplers, sd_models, shared
 from modules.processing import Processed, process_images
 from modules.shared import opts, cmd_opts, state
-from modules.hypernetworks import hypernetwork
 
-from extensions.generate_from_json.py import const
-from extensions.generate_from_json.py.generate_json_images import generate_json_images
-
-const.JSON_DIR = os.path.join('extensions', 'generate_from_json', 'json')
-const.WEBP_DIR = os.path.join('extensions', 'generate_from_json', 'webp')
-const.CONFIG_FILE = os.path.join('extensions', 'generate_from_json', 'config.json')
+from py import const
+from py.generate_json_images import generate_json_images
 
 def open_folder(f):
     if not os.path.isdir(f):
@@ -54,10 +37,6 @@ def open_json_directory_click():
 def open_webp_directory_click():
     return open_folder(const.WEBP_DIR)
 
-def text_button_onclick():
-    pprint.pprint('clicked')
-    return []
-
 class Script(scripts.Script):
     def title(self):
         return "Generate from json"
@@ -68,8 +47,6 @@ class Script(scripts.Script):
         open_webp_directory = gr.Button("Open WEBP Directory")
         open_webp_directory.click(fn=open_webp_directory_click)
 
-        #text_button = gr.Button("Test")
-        #text_button.click(text_button_onclick, inputs=[], outputs=[])
         return []
 
     def on_show(self):

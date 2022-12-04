@@ -22,8 +22,8 @@ from modules.processing import Processed, process_images
 from modules.shared import opts, cmd_opts, state
 from modules.hypernetworks import hypernetwork
 
-from extensions.generate_from_json.py import const
-from extensions.generate_from_json.py.extra_outputs import extra_outputs
+from . import const
+from .extra_outputs import extra_outputs
 
 # Hypernetをnameから引けるように準備しておく
 hs = {}

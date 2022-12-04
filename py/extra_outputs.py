@@ -1,28 +1,16 @@
 import math
 import os
 import sys
-import traceback
-import random
 import json
-import platform
-import subprocess as sp
-import copy
-import re
-import pprint
-import itertools
 import time
 
 from PIL import Image, ImageDraw, ImageFont
-from glob import glob
 import gradio as gr
 
-import modules.scripts as scripts
-from modules import sd_samplers, sd_models, shared
-from modules.processing import Processed, process_images
+from modules import shared
 from modules.shared import opts, cmd_opts, state
-from modules.hypernetworks import hypernetwork
 
-from extensions.generate_from_json.py import const
+from . import const
 
 def upscale(image, scaler_index, resize, mode, resize_w, resize_h, crop):
     upscaler = shared.sd_upscalers[scaler_index]
