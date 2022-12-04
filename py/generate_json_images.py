@@ -103,9 +103,7 @@ def generate_json_images(p):
                     elif k in ["hypernet_strength", "eta","subseed_strength","denoising_strength"]:
                         job.update({k: float(r[i])})
                     elif k == "sampler":
-                        for idx, name in enumerate(sd_samplers.samplers):
-                            if r[i] in name:
-                                job.update({"sampler_index": idx})
+                        job.update({"sampler_name": r[i]})
                     else:
                         job.update({k: r[i]})
                     i += 1
